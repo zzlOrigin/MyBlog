@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!--ShiroReaml Bean-->
+    <bean id="shiroRealm" class="com.zhilong.auth.ShiroRealm">
+        <constructor-arg type="com.zhilong.service.AdminService" ref="adminServiceImpl"/>
+    </bean>
+    <!--创建SecurityManager-->
+    <bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+        <property name="realm" ref="shiroRealm"/>
+        <property name="cacheManager" ref="cacheManager"/>
+    </bean>
+    <!--配置shiroFilter-->
+    <bean id="shiro" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+        <!--登录的url-->
+        <property name="loginUrl" value="/login"/>
+        <!--认证失败的url-->
+        <property name="unauthorizedUrl" value="/static/html/40x.html"/>
+        <!--登录成功的url-->
+        <property name="successUrl" value="/static/html/200.html"/>
+        <!--配置securityManager-->
+        <property name="securityManager" ref="securityManager"/>
+        <!--配置自定义的Filter-->
+        <property name="filters">
+            <map>
+                <entry key="user">
+                    <bean class="com.zhilong.auth.MyRolesFilter"/>
+                </entry>
+            </map>
+        </property>
+        <!--配置访问路径和角色的配置关系-->
+        <property name="filterChainDefinitions">
+            <value>
+                / = anon
+                /static/** = anon
+                /** = authc
+            </value>
+        </property>
+    </bean>
+    <!--缓存管理者-->
+    <bean id="cacheManager" class="org.apache.shiro.cache.MemoryConstrainedCacheManager"/>
+</beans>
